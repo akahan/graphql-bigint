@@ -1,8 +1,10 @@
-const { GraphQLScalarType } = require('graphql');
-const { INT } = require('graphql/language/kinds');
+const {GraphQLScalarType} = require('graphql');
+const {Kind} = require('graphql/language/kinds');
 
 const MAX_INT = Number.MAX_SAFE_INTEGER;
 const MIN_INT = Number.MIN_SAFE_INTEGER;
+const invalidValueMessage = 'BigInt cannot represent non 53-bit signed integer value';
+const invalidTypeMessage = 'BigInt cannot represent non 53-bit signed integer type';
 
 const GraphQLBigInt = new GraphQLScalarType({
   name: 'BigInt',
@@ -11,36 +13,36 @@ const GraphQLBigInt = new GraphQLScalarType({
     'values. BigInt can represent values between -(2^53) + 1 and 2^53 - 1. ',
   serialize: coerceBigInt,
   parseValue: coerceBigInt,
-  parseLiteral(ast) {
-    if (ast.kind === INT) {
-      const num = parseInt(ast.value, 10);
-      if (num <= MAX_INT && num >= MIN_INT) {
-        return num
-      }
+  parseLiteral: function (ast) {
+    if (ast.kind !== Kind.INT) {
+      throw new TypeError(`${invalidTypeMessage}: ${ast.kind}`);
     }
-    return null
+
+    const num = parseInt(ast.value, 10);
+    if (num > MAX_INT || num < MIN_INT) {
+      throw new TypeError(`${invalidValueMessage}: ${ast.value}`);
+    }
+
+    return num;
   }
 });
 
 function coerceBigInt(value) {
   if (value === '') {
-    throw new TypeError(
-      'BigInt cannot represent non 53-bit signed integer value: (empty string)'
-    )
+    throw new TypeError(`${invalidValueMessage}: (empty string)`);
   }
+
   const num = Number(value);
   if (num !== num || num > MAX_INT || num < MIN_INT) {
-    throw new TypeError(
-      'BigInt cannot represent non 53-bit signed integer value: ' + String(value)
-    )
+    throw new TypeError(`${invalidValueMessage}: ${value}`);
   }
+
   const int = Math.floor(num);
   if (int !== num) {
-    throw new TypeError(
-      'BigInt cannot represent non 53-bit signed integer value: ' + String(value)
-    )
+    throw new TypeError(`${invalidValueMessage}: ${value}`);
   }
-  return int
+
+  return int;
 }
 
 exports.default = GraphQLBigInt;
