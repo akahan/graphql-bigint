@@ -37,7 +37,7 @@ function coerceBigInt(value) {
   const int = Math.floor(num);
   if (int !== num) {
     throw new TypeError(
-      'BigInt cannot represent non-integer value: ' + String(value)
+      'BigInt cannot represent non 53-bit signed integer value: ' + String(value)
     )
   }
   return int
