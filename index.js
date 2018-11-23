@@ -1,10 +1,10 @@
-const { GraphQLScalarType } = require('graphql')
-const { INT } = require('graphql/language/kinds')
+const { GraphQLScalarType } = require('graphql');
+const { INT } = require('graphql/language/kinds');
 
-const MAX_INT = Number.MAX_SAFE_INTEGER
-const MIN_INT = Number.MIN_SAFE_INTEGER
+const MAX_INT = Number.MAX_SAFE_INTEGER;
+const MIN_INT = Number.MIN_SAFE_INTEGER;
 
-module.exports = new GraphQLScalarType({
+const GraphQLBigInt = new GraphQLScalarType({
   name: 'BigInt',
   description:
     'The `BigInt` scalar type represents non-fractional signed whole numeric ' +
@@ -13,14 +13,14 @@ module.exports = new GraphQLScalarType({
   parseValue: coerceBigInt,
   parseLiteral(ast) {
     if (ast.kind === INT) {
-      const num = parseInt(ast.value, 10)
+      const num = parseInt(ast.value, 10);
       if (num <= MAX_INT && num >= MIN_INT) {
         return num
       }
     }
     return null
   }
-})
+});
 
 function coerceBigInt(value) {
   if (value === '') {
@@ -28,13 +28,13 @@ function coerceBigInt(value) {
       'BigInt cannot represent non 53-bit signed integer value: (empty string)'
     )
   }
-  const num = Number(value)
+  const num = Number(value);
   if (num !== num || num > MAX_INT || num < MIN_INT) {
     throw new TypeError(
       'BigInt cannot represent non 53-bit signed integer value: ' + String(value)
     )
   }
-  const int = Math.floor(num)
+  const int = Math.floor(num);
   if (int !== num) {
     throw new TypeError(
       'BigInt cannot represent non-integer value: ' + String(value)
@@ -43,3 +43,5 @@ function coerceBigInt(value) {
   return int
 }
 
+exports.default = GraphQLBigInt;
+module.exports = exports.default;
